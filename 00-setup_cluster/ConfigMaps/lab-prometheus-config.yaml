@@ -1,0 +1,73 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: lab-prometheus-config
+  namespace: dst-lab
+
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+
+    scrape_configs:
+
+      - job_name: 'kubernetes-hosts'
+        kubernetes_sd_configs:
+          - role: node
+            namespaces:
+              names: ["dst-lab"]
+        relabel_configs:
+          - source_labels: [__address__]
+            regex: (.*):\d+
+            target_label: __address__
+            replacement: ${1}:9100
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: instance
+          - source_labels: [__meta_kubernetes_node_label_kubernetes_io_hostname]
+            target_label: node
+      
+      - job_name: 'cadvisor-full'
+        scheme: http
+        kubernetes_sd_configs:
+        - role: endpoints
+          namespaces: { names: ["dst-lab"] }
+
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          regex: lab-cadvisor
+          action: keep
+        - source_labels: [__meta_kubernetes_endpoint_node_name]
+          target_label: instance
+        - source_labels: [__meta_kubernetes_endpoint_node_name]
+          target_label: node
+        
+          
+      - job_name: "kubernetes-pods-rtt"
+        metrics_path: /probe
+        params:
+          module: [icmp_rtt]
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ["dst-lab"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            regex: nimp2p-experiment-.*     
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+            regex: nimp2p-experiment-.*
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_ready]
+            regex: "true"
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: __param_target
+          - source_labels: [__meta_kubernetes_pod_ip]
+            target_label: instance
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod_name
+          - target_label: __address__
+            regex: (.*):\d+
+            replacement: ${1}:9115
+
+        

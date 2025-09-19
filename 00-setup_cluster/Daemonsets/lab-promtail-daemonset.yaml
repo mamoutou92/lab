@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lab-promtail
+  namespace: dst-lab
+spec:
+  selector:
+    matchLabels:
+      name: lab-promtail
+  template:
+    metadata:
+      labels:
+        name: lab-promtail
+      annotations:
+        kubernetes.io/egress-bandwidth: "10M"
+        kubernetes.io/ingress-bandwidth: "10M"
+    spec:
+      serviceAccountName: prometheus
+      volumes:
+        - name: promtail-config-volume
+          configMap:
+            name: lab-promtail-config
+        - name: pods
+          hostPath:
+            path: /var/log/pods
+        - name: promtail-positions
+          hostPath:
+            path: /home/ubuntu/volumes/promtail/positions
+            type: DirectoryOrCreate
+      containers:
+      - name: lab-promtail
+        image: grafana/promtail:3.1.1
+        args:
+          - -config.file=/etc/promtail/config.yaml
+          - -config.expand-env=true
+        securityContext:
+            privileged: true
+            runAsUser: 0
+        resources:
+            requests:
+              cpu: "0.05"
+              memory: "32Mi"
+            limits:
+              cpu: "0.1"
+              memory: "64Mi"
+        volumeMounts:
+          - name: promtail-config-volume
+            mountPath: /etc/promtail/config.yaml
+            subPath: config.yaml
+          - name: pods
+            mountPath: /var/log/pods
+            readOnly: true
+          - name: promtail-positions
+            mountPath: /run/promtail
+        
+        env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lab-cadvisor
+  namespace: dst-lab
+spec:
+  selector:
+    matchLabels:
+      name: lab-cadvisor
+  template:
+    metadata:
+      labels:
+        name: lab-cadvisor
+      annotations:
+        kubernetes.io/egress-bandwidth: "20M"
+        kubernetes.io/ingress-bandwidth: "20M"
+    spec:
+      hostNetwork: true
+      hostPID: true
+      containers:
+      - name: cadvisor
+        image: gcr.io/cadvisor/cadvisor:v0.49.1
+        securityContext: { privileged: true }
+        args:
+          - --port=5588   
+          - --housekeeping_interval=4s
+          - --containerd=/run/k3s/containerd/containerd.sock
+          - --store_container_labels=true
+        ports:
+          - name: http
+            containerPort: 5588
+            hostPort: 5588
+        resources:
+            requests:
+              cpu: "0.4"
+              memory: "64Mi"
+            limits:
+              cpu: "0.5"
+              memory: "128Mi"
+        volumeMounts:
+          - { name: rootfs,    mountPath: /rootfs,    readOnly: true }
+          - { name: var-run,   mountPath: /var/run,   readOnly: true }
+          - { name: sys,       mountPath: /sys,       readOnly: true }
+          - { name: containerd, mountPath: /run/k3s/containerd, readOnly: true }
+          - { name: docker,    mountPath: /var/lib/docker, readOnly: true }
+      volumes:
+        - { name: rootfs,    hostPath: { path: / } }
+        - { name: var-run,   hostPath: { path: /var/run } }
+        - { name: sys,       hostPath: { path: /sys } }
+        - { name: containerd, hostPath: { path: /run/k3s/containerd } }
+        - { name: docker,    hostPath: { path: /var/lib/docker } }
+

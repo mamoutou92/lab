@@ -1,0 +1,88 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: lab-grafana
+  namespace: dst-lab
+  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab-grafana
+  template:
+    metadata:
+      labels:               
+        app: lab-grafana
+      annotations:
+        kubernetes.io/egress-bandwidth: "20M"
+        kubernetes.io/ingress-bandwidth: "20M"
+    spec:
+      volumes:
+        - name: grafana-data-volume
+          hostPath:
+            path: /home/ubuntu/volumes/grafana/data
+            type: DirectoryOrCreate
+        - name: prometheus-datasource-volume
+          configMap:
+            name: lab-grafana-config
+      containers:
+        - name: lab-grafana
+          image: grafana/grafana
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: "64Mi"
+            limits:
+              cpu: "1"
+              memory: "128Mi"
+          volumeMounts:
+            - name: grafana-data-volume
+              mountPath: /var/lib/grafana
+            - name: prometheus-datasource-volume
+              mountPath: /etc/grafana/provisioning/datasources/prometheus-datasource.yml
+              subPath: prometheus-datasource.yml
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: dst-lab
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: Lab@2025!
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            runAsUser: 0
+      restartPolicy: Always
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: Exists
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lab-grafana
+  namespace: dst-lab
+spec:
+  ports:
+    - name: grafana-http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 31000
+  selector:
+    app: lab-grafana
+  type: NodePort
+  
+  
+
+     
+
+

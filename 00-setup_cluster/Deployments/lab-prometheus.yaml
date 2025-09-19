@@ -1,0 +1,83 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: lab-prometheus
+  namespace: dst-lab
+  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab-prometheus
+  template:
+    metadata:
+      labels:               
+        app: lab-prometheus
+      annotations:
+        kubernetes.io/egress-bandwidth: "10M"
+        kubernetes.io/ingress-bandwidth: "10M"
+    spec:
+      serviceAccountName: prometheus
+      volumes:
+        - name: prometheus-volume
+          hostPath:
+            path: /home/ubuntu/volumes/prometheus
+            type: DirectoryOrCreate
+        - name: config-volume
+          configMap:
+            name: lab-prometheus-config
+      containers:
+        - name: lab-prometheus
+          image: prom/prometheus
+          args:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.retention.time=30d'
+            - '--storage.tsdb.path=/prometheus'
+            - '--storage.tsdb.retention.size=20GB'
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "0.05"
+              memory: "64Mi"
+            limits:
+              cpu: "0.1"
+              memory: "80Mi"
+          volumeMounts:
+            - name: prometheus-volume
+              mountPath: /prometheus
+            - name: config-volume
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+            runAsUser: 0
+      restartPolicy: Always
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - vps-strasbourg
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lab-prometheus
+  namespace: dst-lab
+spec:
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+      nodePort: 30001
+  selector:
+    app: lab-prometheus
+  type: NodePort
+
+

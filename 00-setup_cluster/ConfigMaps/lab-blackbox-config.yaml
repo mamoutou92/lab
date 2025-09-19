@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab-blackbox-config
+  namespace: dst-lab
+data:
+  config.yml: |
+     modules:
+       icmp_rtt:
+         prober: icmp
+         timeout: 5s

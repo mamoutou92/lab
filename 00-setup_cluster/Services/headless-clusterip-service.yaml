@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nimp2p-service
+  namespace: dst-lab
+  labels:
+    app: nimp2p
+spec:
+  clusterIP: None       
+  selector:
+    app: nimp2p        
+  ports:
+    - port: 5000
+      targetPort: 5000 
+      name: p2p-port
