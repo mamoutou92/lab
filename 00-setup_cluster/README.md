@@ -4,7 +4,7 @@ This guide Create a minimal K3s cluster with **Calico CNI**, then applies all ma
 
 ##  1)  Install K3s (with flannel disabled)
 1. Run following commands on the **Master Node**: 
-```bash 
+```bash
 export INSTALL_K3S_VERSION=v1.33.4+k3s1 && curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--flannel-backend=none --disable-network-policy --cluster-cidr=10.42.0.0/16" sh -s - --token mamoutou@2025
 ```
 2. Get the **K3S token**:  
@@ -12,7 +12,9 @@ export INSTALL_K3S_VERSION=v1.33.4+k3s1 && curl -sfL https://get.k3s.io | INSTAL
 sudo cat /var/lib/rancher/k3s/server/node-token
 ```
 3. Run this on each **Worker Node**: <br />
-``` export INSTALL_K3S_VERSION=v1.33.4+k3s1 && curl -sfL https://get.k3s.io | K3S_URL=https://51.91.101.28:6443 K3S_TOKEN=<TOKEN> sh -```
+```bash
+ export INSTALL_K3S_VERSION=v1.33.4+k3s1 && curl -sfL https://get.k3s.io | K3S_URL=https://51.91.101.28:6443 K3S_TOKEN=<TOKEN> sh -
+ ```
 
 ##  2) Install Calico
 From the master node run:
