@@ -1,0 +1,1 @@
+go build -ldflags "-linkmode 'external' -extldflags '-static'" -o nimp2p-lab
