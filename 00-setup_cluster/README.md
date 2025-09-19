@@ -36,7 +36,7 @@ sudo kubectl apply -f Namespaces/
 ```
 ### 4-2. Create ServiceAccounts (for kubernetes-dashboard)
 ```bash 
-
+sudo kubectl apply -f ServiceAccounts/
 ```
 ### 4-3. Create ClusterRoles (for prometheus and kubernetes-dashboard)
 ```bash 
@@ -55,18 +55,27 @@ For High Availability reasons, these deployments are hosted only on master nodes
 ```bash 
 sudo kubectl apply -f Deployments/
 ```
-You can now access grafana and import the sashboards in the **GrafanaDashborads** folder:
- - **Credentials**:
-   - User: dst-lab
-   - Password: dst-lab
-   - URL: ***http://<MASTER_NODE_IP>:31000***
-   - Demo: [Click Here](http://ift-master:31000/login)
-<img src="img/grafana-demo.png" alt="grafana page"/>
-<br/>
-
-
-### 4-6. Create Daemonsets (cadvisor, promtail, node-exporter)
+### 4-7. Create Daemonsets (cadvisor, promtail, node-exporter)
 Daemonsets are necessary here because we need these components on all the nodes of the cluster in order to export kubernetes-level, hosts-level metrics as well as logs of the deployed nimp2p pods.
 ```bash 
 sudo kubectl apply -f Daemonsets/
 ```
+You can now access grafana and import the dashboards in the **GrafanaDashborads** folder:
+ - **Credentials**:
+   - User: dst-lab
+   - Password: dst-lab
+   - URL: ***http://<MASTER_NODE_IP>:31000***
+   - Demo: [Click Here](http://51.91.101.28:31000)
+<img src="img/grafana-demo.png" alt="grafana page"/>
+
+### 4-8. Deploy Kubernetes Dashboard 
+1. Run the commands below:
+```bash 
+VERSION_KUBE_DASHBOARD=v2.7.0
+sudo kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/${VERSION_KUBE_DASHBOARD}/aio/deploy/recommended.yaml
+sudo kubectl expose deployment kubernetes-dashboard -n kubernetes-dashboard --type=NodePort --name=kdash --port=8443 --target-port=8443 --external-ip=<MASTER_NODE_IP>
+sudo kubectl -n kubernetes-dashboard create token lab-user
+```
+2. Run the commands below:
+Create a token and access the dashboard via: ***https://<MASTER_NODE_IP>:8443***
+  - Demo: [Click Here](http://51.91.101.28:8443)
