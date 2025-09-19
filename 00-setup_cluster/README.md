@@ -68,7 +68,13 @@ You can now access grafana and import the dashboards in the **GrafanaDashborads*
    - Demo: [Click Here](http://51.91.101.28:31000)
 <img src="img/grafana-demo.png" alt="grafana page"/>
 
-### 4-8. Deploy Kubernetes Dashboard 
+### 4-8. Create Headless Service for NimP2P nodes Discovery
+1. Run the commands below:
+```bash 
+sudo kubectl apply -f HeadlessServices/
+```
+
+### 4-9. Deploy Kubernetes Dashboard 
 1. Run the commands below:
 ```bash 
 VERSION_KUBE_DASHBOARD=v2.7.0
@@ -78,4 +84,4 @@ sudo kubectl -n kubernetes-dashboard create token lab-user
 ```
 2. Run the commands below:
 Create a token and access the dashboard via: ***https://<MASTER_NODE_IP>:8443***
-  - Demo: [Click Here](http://51.91.101.28:8443)
+  - Demo: [Click Here](https://51.91.101.28:8443)
