@@ -175,14 +175,12 @@ To guarantee a **global message injection rate** across an experiment (e.g., one
 
 - The Operator would manage a **CustomResourceDefinition (CRD)** called `NimP2PExperiment`.  
 - Each CRD instance defines the experiment and contains a list of **experimentUnits** (representing individual NimP2P pods and their environment variables).  
-- Unlike a standard StatefulSet, the Operator can assign **different environment variables** to each pod, enabling fine-grained rate control.  
+- Unlike a standard StatefulSet, the Operator can assign **different environment variables** to different pod, enabling fine-grained rate control.  
 
 For example, if the user requests a global message rate of 2 messages per second (`MSGRATE=500ms`), the Operator could distribute this load across peers:  
 - Pod 1: `MSGRATE=1000`  
 - Pod 2: `MSGRATE=1000`  
 - Remaining pods: `MSGRATE=0`  
-
-This ensures the **entire experiment network** injects messages at the requested global rate, rather than each peer sending independently.
 
 ---
 
@@ -193,9 +191,9 @@ In the current design:
 - Per-pod limits are set (CPU, RAM, UL/DL bandwidth).  
 - Monitoring workloads (Prometheus, Grafana, Loki, etc.) are pinned to the master node, leaving worker nodes fully dedicated to experiments.  
 
-The capacity is estimated as:  
+The maximum number of nimp2p pods that can be created is estimated as:  
 
-**MAX_PODS = min(TOTAL_RAM / PER_PEER_RAM, TOTAL_CORES / PER_PEER_CPU, TOTAL_DL / PER_PEER_DL, TOTAL_UL / PER_PEER_UL)**  
+**MAX_PODS =** `min(TOTAL_RAM / PER_PEER_RAM, TOTAL_CORES / PER_PEER_CPU, TOTAL_DL / PER_PEER_DL, TOTAL_UL / PER_PEER_UL)` 
 
 Example:  
 - 2 worker nodes, each with 16 cores and 32 GB RAM (total 32 cores, 64 GB RAM).  
