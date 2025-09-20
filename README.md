@@ -2,7 +2,7 @@
 This repository presents a Kubernetes-based monitoring and logging stack for large-scale experimentation with NimP2P nodes.
 
 The solution is **multi-tenant**: multiple experiments can run concurrently without interfering with each other. Each experiment’s metrics and logs are isolated in Grafana dashboards, thanks to a **unique experiment label** applied to every pod created by the experiment’s StatefulSet.
-## Deploying the kubernetes cluster and required monitoring/logging stack
+## Deploying the kubernetes cluster and the monitoring/logging stack
  - To deploy the cluster and all the required **monitoring/logging** components, Please follow the instruction in [Prometheus config](./00-setup_cluster/).
  - To use the **nimp2p-lab cli** tool, you can directly place the binary in this repo under your `/usr/local/bin/`
  - To build  **nimp2p-lab** from source, run:
