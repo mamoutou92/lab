@@ -95,15 +95,78 @@ Metrics are scraped by **Prometheus**, deployed on the master node as a standard
 
 ---
 
-### Visualization (K3S Deployments + Custom Grafana Dashboards)
-For visualization I rely on Grafana and Kubernetes Dashboard which are both deployed as Kubernetes deployments. The Grafana config is stored in a ConfigMap and include prometheus and Loki as data sources. I've created 4 main dashboards in Grafana:  
+### Visualization (K3s Deployments + Custom Grafana Dashboards)
+
+For visualization, I rely on **Grafana** and the **Kubernetes Dashboard**, both deployed as standard Kubernetes deployments.  
+
+- **Grafana**: Configured through a ConfigMap, with **Prometheus** and **Loki** set as data sources.  
+- **Kubernetes Dashboard**: Provides a general-purpose web UI for inspecting workloads, nodes, and cluster health.  
+
+I created **four main Grafana dashboards** to support experiment analysis:
+
+---
+
 #### 1. NimP2P Experiments Metrics Dashboard
+This dashboard tracks **experiment-level metrics** such as data rate, CPU, and memory usage — both per experiment and per individual NimP2P node. It also shows the contribution of each experiment (or node) to the **overall cluster resource usage**.  
+This makes it possible to detect when additional resources are required or when the cluster is nearing capacity.  
+
+**Example (purple experiment):**  
+<p float="left">
+  <img src="./images/purple-metrics-1.png" width="300" />
+  <img src="./images/purple-metrics-2.png" width="300" />
+</p>  
+
+[🔗 View snapshot here](#)  
+
+---
 
 #### 2. NimP2P Experiments Log Dashboard
+This dashboard focuses on **logs and message statistics**:  
+- Raw logs per experiment and per individual NimP2P node  
+- Counts of `INFO` vs. `ERROR` messages  
+- Number of transmitted messages (e.g., by counting `sending at` in logs)  
+
+Future improvements could include:
+- Tracking successful sends vs. failures  
+- Number of topics per peer  
+- Mesh degree per topic  
+- End-to-end delivery delay  
+
+**Example (purple experiment):**  
+<p float="left">
+  <img src="./images/purple-logs-1.png" width="300" />
+  <img src="./images/purple-logs-2.png" width="300" />
+</p>  
+
+[🔗 View snapshot here](#)  
+
+---
 
 #### 3. Physical Cluster Metrics Dashboard
+This dashboard monitors **aggregated physical resources** at the cluster and node levels:  
+- CPU  
+- Memory  
+- Bandwidth  
+- (future) RTT  
 
-#### 4. Kubernetes cluster monitoring Dashboard
+It provides visibility into **overall capacity** and helps determine when additional nodes or resources are required to scale experiments.  
 
+**Example:**  
+<p float="left">
+  <img src="./images/cluster-metrics-1.png" width="300" />
+  <img src="./images/cluster-metrics-2.png" width="300" />
+</p>  
+
+---
+
+#### 4. Kubernetes Cluster Monitoring Dashboard
+This dashboard provides **Kubernetes cluster health metrics**, relying on **cAdvisor** without namespace filters.  
+It gives insight into the **resource usage of non-experiment workloads**, so you can see the impact of supporting services (Prometheus, Grafana, Loki, etc.) alongside NimP2P experiments.  
+
+**Example:**  
+<p float="left">
+  <img src="./images/k8s-monitoring-1.png" width="300" />
+  <img src="./images/k8s-monitoring-2.png" width="300" />
+</p>  
 
 
