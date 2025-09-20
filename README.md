@@ -96,6 +96,14 @@ Metrics are scraped by **Prometheus**, deployed on the master node as a standard
 ---
 
 ### Visualization (K3S Deployments + Custom Grafana Dashboards)
-For visualization I rely on Grafana and Kubernetes Dashboards which are both deployed as Kubernetes deployments. 
+For visualization I rely on Grafana and Kubernetes Dashboard which are both deployed as Kubernetes deployments. The Grafana config is stored in a ConfigMap and include prometheus and Loki as data sources. I've created 4 main dashboards in Grafana:  
+#### 1. NimP2P Experiments Metrics Dashboard
+
+#### 2. NimP2P Experiments Log Dashboard
+
+#### 3. Physical Cluster Metrics Dashboard
+
+#### 4. Kubernetes cluster monitoring Dashboard
+
 
 
