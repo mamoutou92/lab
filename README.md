@@ -2,6 +2,11 @@
 This repository presents a Kubernetes-based monitoring and logging stack for large-scale experimentation with NimP2P nodes.
 
 The solution is **multi-tenant**: multiple experiments can run concurrently without interfering with each other. Each experiment’s metrics and logs are isolated in Grafana dashboards, thanks to a **unique experiment label** applied to every pod created by the experiment’s StatefulSet.
+## Deploying the kubernetes cluster and required monitoring/logging stack
+ - To deploy the cluster and all the required **monitoring/logging** components, Please follow the instruction in [Prometheus config](./00-setup_cluster/).
+ - To use the **nimp2p-lab cli** tool, you can directly place the binary in this repo under your `/usr/local/bin/`
+ - To build  **nimp2p-lab** from source, run: ```./build.sh```
+**Note:** you need to copy your ```/etc/rancher/k3s/k3s.yaml``` into ``̀`~/.kube/config``` so that **nimp2p-lab** can access Kubernetes.
 ## Architecture and Design Choices
 At a high level, the proposed solution consists of a lightweight **Golang-based CLI tool**(```nimp2p-lab```) that interacts with a **K3S cluster** (preconfigured with monitoring/logging components), allowing users to: 
   - Create new experiments
@@ -9,7 +14,7 @@ At a high level, the proposed solution consists of a lightweight **Golang-based 
   - Scale experiments (up or down)
   - Delete experiments cleanly list, scale, and delete experiments.
   The picture below illustrates the overall stack, highlighting the main components and their corresponding kubernetes objects.
-### Experiment Unit (Statefulset + ClusterIP + Custom Label)
+### Experiment Unit (K3S Statefulset + K3S ClusterIP + K3S Labels)
 An **experiment unit** is a self-contained deployment that represents a NimP2P network.  
 Each unit consists of a **StatefulSet** (to manage the pods) and a **dedicated headless service** (to handle peer discovery).  
 
@@ -34,7 +39,7 @@ blue        nimp2p-exp-blue    4      4        2025-09-20T11:19:09Z  38m24s
 purple      nimp2p-exp-purple  5      5        2025-09-20T11:57:09Z  24s
 ```
 ---
-### Metrics Collectors and Exporters (Deployments + DaemonSets + Filters)
+### Metrics Collectors and Exporters (K3S Deployments + K3S DaemonSets + Prometheus Filters)
 
 The monitoring stack collects **both host-level and pod-level metrics** to provide visibility into the health of the cluster and the performance of NimP2P experiments.
 
@@ -79,8 +84,14 @@ Metrics are scraped by **Prometheus**, deployed on the master node as a standard
 - Filters are applied in the Prometheus config to **only scrape the `dst-lab` namespace**, avoiding unnecessary metrics collection and reducing bandwidth overhead.
 ---
 
-### Log Collectors and Exporters (Deployments + DaemonSets + Filters)
+### Log Collectors and Exporters (K3S Deployments + K3S DaemonSets + Promtail Filters)
 **Logs are pushed to Loki**, which is deployed on the master node as a standard Kubernetes **Deployment**. The Loki configuration is stored in a **ConfigMap** ([Loki config](./00-setup_cluster/ConfigMaps/lab-loki-config.yaml)).
 
 **Logs are pushed by Promtail**, which is deployed as a **DaemonSet**, with the host’s pod log directory (`/var/log/pods`) mounted to expose container-level logs. The Promtail configuration is stored in a **ConfigMap** ([Promtail config](./00-setup_cluster/ConfigMaps/lab-promtail-config.yaml)). The config includes multiple relabelling (in order to be able to show logs per experiment in grafana) and uses a regex to consider pods with label `prefix=nimp2p-exp.*`
-## Deploying the kubernetes cluster
+
+---
+
+### Visualization (K3S Deployments + Custom Grafana Dashboards)
+For visualization I rely on Grafana and Kubernetes Dashboards which are both deployed as Kubernetes deployments. 
+
+
