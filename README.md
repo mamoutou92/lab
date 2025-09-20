@@ -51,7 +51,7 @@ Pod-level metrics focus on evaluating NimP2P nodes directly. For these, I've sel
 - Uplink and downlink data rate between peers  
 - Packet drops and byte errors  
 - CPU, memory, and bandwidth consumption per pod  
-To export the above metrics, I deployed  **cAdvisor** as a **DaemonSet**, with the host’s pod log directory (`/var/log/pods`) mounted to expose container-level data.
+To export the above metrics, I deployed  **cAdvisor** as a **DaemonSet**.
 
 #### RTT Metrics (Work in Progress)
 Round-trip time (RTT) between peers is a critical metric for evaluating **network health and latency**, especially in a **GossipSub network**:  
@@ -79,4 +79,7 @@ Metrics are scraped by **Prometheus**, deployed on the master node as a standard
 - Filters are applied in the Prometheus config to **only scrape the `dst-lab` namespace**, avoiding unnecessary metrics collection and reducing bandwidth overhead.
 ---
 
+### Log Collectors and Exporters (Deployments + DaemonSets + Filters)
+- Logs are pushed to **Loki**, deployed on the master node as a standard Kubernetes **Deployment**. The Loki configuration is stored in a **ConfigMap** (`00-setup_cluster/ConfigMaps/lab-loki-config.yaml`).
+- Logs are pushed to Loki by **Promtail**, deployed as a **DaemonSet**, with the host’s pod log directory (`/var/log/pods`) mounted to expose container-level logs. The Promtail configuration is stored in a **ConfigMap** (`00-setup_cluster/ConfigMaps/lab-promtail-config.yaml`). The config includes multiple relabelling (in order to be able to show logs per experiment in grafana) and uses a regex to consider pods with label `prefix=nimp2p-exp.*`
 ## Deploying the kubernetes cluster
