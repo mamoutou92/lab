@@ -161,8 +161,107 @@ It provides visibility into **overall capacity** and helps determine when additi
 ---
 
 #### 4. Kubernetes Cluster Monitoring Dashboard
-This dashboard provides **Kubernetes cluster health metrics**, relying on **cAdvisor** without namespace filters.  
+This dashboard provides **Kubernetes cluster health metrics**, relying on **cAdvisor** exported metrics.  
 It gives insight into the **resource usage of non-experiment workloads**, so you can see the impact of supporting services (Prometheus, Grafana, Loki, etc.) alongside NimP2P experiments.  
   
+## Extra Thinking
+#### A solution for constant rate message injection per experiment
+To ensure  a constant rate of message injection across an entire experiment network (e.g., one global message per second), I would create a dedicated **Kubernetes Operator** for managing the experiment. A **CustomResourceDefinition (CRD)** named **nimp2pexperiment** to represent an experiment. This CRD will define the **experimentUnit** object which represents a single nimp2p pod with its ENV. The CRD will contain a list of experimentUnit. With this design, the Operator can use different ENV for different experimentUnit of the same experiment deployment (which is not possible with standard statefullset). TThe nimp2p-lab tool will be modified so that it uses the CRD to define new experiment. When the user indicates for instance a global MSGRATE of 500ms ( i.e., 2 messages per second), the Experiment Operator will make sure to enforce that. A simple way to do it in the code is to distribute the rate accross the peers by changing some peers **MSGRATE** ENV and keeping others to 0. In our example, the Operator will create the first 2 pods with **MSGRATE** set to **1000** and set the other peers **MSGRATE** to **0**.
+
+## Extra Thinking
+
+### A solution for constant-rate message injection per experiment
+To guarantee a **global message injection rate** across an experiment (e.g., one message per second across all peers), I would introduce a dedicated **Kubernetes Operator**.  
+
+- The Operator would manage a **CustomResourceDefinition (CRD)** called `NimP2PExperiment`.  
+- Each CRD instance defines the experiment and contains a list of **experimentUnits** (representing individual NimP2P pods and their environment variables).  
+- Unlike a standard StatefulSet, the Operator can assign **different environment variables** to each pod, enabling fine-grained rate control.  
+
+For example, if the user requests a global message rate of 2 messages per second (`MSGRATE=500ms`), the Operator could distribute this load across peers:  
+- Pod 1: `MSGRATE=1000`  
+- Pod 2: `MSGRATE=1000`  
+- Remaining pods: `MSGRATE=0`  
+
+This ensures the **entire experiment network** injects messages at the requested global rate, rather than each peer sending independently.
+
+---
+
+### How much can we push a machine without affecting performance?
+Three resources bound scalability: **CPU, memory, and bandwidth (BW)**.  
+
+In the current design:  
+- Per-pod limits are set (CPU, RAM, UL/DL bandwidth).  
+- Monitoring workloads (Prometheus, Grafana, Loki, etc.) are pinned to the master node, leaving worker nodes fully dedicated to experiments.  
+
+The capacity is estimated as:  
+
+**MAX_PODS = min(TOTAL_RAM / PER_PEER_RAM, TOTAL_CORES / PER_PEER_CPU, TOTAL_DL / PER_PEER_DL, TOTAL_UL / PER_PEER_UL)**  
+
+Example:  
+- 2 worker nodes, each with 16 cores and 32 GB RAM (total 32 cores, 64 GB RAM).  
+- 1 Gbps interconnect.  
+- Default per-pod config: CPU=0.05, RAM=16 MiB, UL/DL=16 Mbps.  
+`MAX_PODS = min(64 GB / 16 MB, 32 / 0.05, 1 Gbps / 16 Mbps, 1 Gbps / 16 Mbps) = min(4000, 640, 62, 62) = 62`
+
+This shows that **bandwidth** is the real limiting factor here, not CPU or RAM.  
+- If pods run on the same node, or if inter-node links are upgraded to 10–100 Gbps, bandwidth constraints are lifted and scalability improves.  
+- Alternatively, a single high-performance server can be used as the sole worker node.
+
+#### How different Gossipsub parameters affect the network ?
+Gossipsub parameters such as number of topics per peers, mesh degree and message sizes strongly influence network and performance: 
+
+ - **Mesh degree**:  
+  - Higher degree → more active connections.  
+  - With TCP, this means more file descriptors and more memory to maintain connection state.  
+  - Linux systems impose limits on file descriptors and memory, so high degrees can lead to connection rejections.  
+
+- **Message size**:  
+  - Large messages combined with high mesh degree consume significant bandwidth.  
+  - Publish bursts can cause **queue buildup** and **transient delay spikes**, even if total bandwidth is sufficient. This may cause  packet drops in case of Small queues.  
+
+**Mitigation:**  
+- Apply **pacing techniques** to smooth message bursts.  
+- Size queues at least **2× the Bandwidth-Delay Product (BDP)** to absorb spikes. 
+
+    
+### How we can differentiate if a node is behaving badly or if it is just a network issue ?
+
+When a NimP2P node appears to behave incorrectly (e.g., dropping messages or failing to connect), the root cause might not be the application itself.  
+It is important to first rule out **network-related problems**, which can occur at two levels: the **host network** or the **Kubernetes pod network**.
+
+---
+
+#### Host Network Issues
+These typically arise from the underlying infrastructure — for example, middleboxes, deep packet inspection (DPI), or incorrect routing tables.  
+To detect such problems, we can:  
+- Deploy the **Blackbox Exporter** as a DaemonSet (with `hostNetwork` set to true) to run ICMP/HTTP/HTTPS probes between hosts.  
+- Monitor the results:  
+  - **Failed ICMP probes** → indicate hosts cannot reach each other at the network layer.  
+  - **High TCP/UDP error counts** ( already visible in the *Physical Cluster Metrics Dashboard*) → may signal packet drops caused by firewalls, middleboxes, or tunneling issues.  
+
+---
+
+#### Pod Network Issues
+Even if the hosts can communicate, the Kubernetes overlay (CNI) may introduce failures — e.g., encapsulation problems preventing pods from reaching each other.  
+To detect such issues, we can:  
+- Run a custom **RTT exporter** as a sidecar in each pod.  
+- Have pods periodically ping each other through the experiment’s headless service.  
+- If these **pod-to-pod probes fail**, while host-to-host are all OK, the problem is likely within the CNI or overlay configuration.  
+
+By Monitoring both **host-level** and **pod-level** probes, we can determine whether an issue truly reflects misbehavior of a NimP2P node, or if it is simply a networking issue.
+**Note:** Small MTU in the hosts or inside the containers can also degrade performance. This can be detected by monitoring packet sizes. In case of large messages (e.g 1440B), IP packet sizes must be around 1500B if the configured MTU is 1500B. If the packet sizes are greatly lower than that during such an experiment, a low MTU might be the root cause.
+
+## Future Improvements
+- **Use Kube-OVN as the CNI**  
+  - Provides better experiment isolation and multi-tenancy through **VPCs and subnets**.  
+  - Enables richer experiment scenarios (e.g., NAT, middleboxes, packet reordering) by inserting custom OpenFlow rules.  
+
+- **Add RTT probes**  
+  - Between hosts (via DaemonSets).  
+  - Between pods within the same experiment (via sidecars).  
+
+- **Introduce an Experiment Operator**  
+  - Manage experiments declaratively via CRDs.  
+ 
 
 
