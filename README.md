@@ -114,6 +114,8 @@ This makes it possible to detect when additional resources are required or when 
 <p float="left">
   <img src="./00-setup_cluster/img/purple-compute-1.png" width="300" />
   <img src="./00-setup_cluster/img/purple-compute-2.png" width="300" />
+ <img src="./00-setup_cluster/img/purple-net-1.png" width="300" />
+  <img src="./00-setup_cluster/img/purple-net-2.png" width="300" />
 </p> 
 
 <p float="left">
