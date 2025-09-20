@@ -6,7 +6,8 @@ The solution is **multi-tenant**: multiple experiments can run concurrently with
  - To deploy the cluster and all the required **monitoring/logging** components, Please follow the instruction in [Prometheus config](./00-setup_cluster/).
  - To use the **nimp2p-lab cli** tool, you can directly place the binary in this repo under your `/usr/local/bin/`
  - To build  **nimp2p-lab** from source, run: ```./build.sh```
-**Note:** you need to copy your ```/etc/rancher/k3s/k3s.yaml``` into ``̀`~/.kube/config``` so that **nimp2p-lab** can access Kubernetes.
+   
+**Note:** you need to copy your `/etc/rancher/k3s/k3s.yaml` into `~/.kube/config` so that **nimp2p-lab** can access Kubernetes.
 ## Architecture and Design Choices
 At a high level, the proposed solution consists of a lightweight **Golang-based CLI tool**(```nimp2p-lab```) that interacts with a **K3S cluster** (preconfigured with monitoring/logging components), allowing users to: 
   - Create new experiments
