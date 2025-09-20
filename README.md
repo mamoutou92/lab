@@ -252,7 +252,8 @@ By Monitoring both **host-level** and **pod-level** probes, we can determine whe
 ## Future Improvements
 - **Use Kube-OVN as the CNI**  
   - Provides better experiment isolation and multi-tenancy through **VPCs and subnets**.  
-  - Enables richer experiment scenarios (e.g., NAT, middleboxes, packet reordering) by inserting custom OpenFlow rules.  
+  - Enables richer experiment scenarios (e.g., NAT, middleboxes, packet reordering) by inserting custom OpenFlow rules.
+  - Better enforces bandwith limits (more advanced than default annotations)
 
 - **Add RTT probes**  
   - Between hosts (via DaemonSets).  
