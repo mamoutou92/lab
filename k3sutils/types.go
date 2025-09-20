@@ -10,6 +10,7 @@ type StatefulSetRow struct {
 	Ready     int32
 	Age       time.Duration
 	ExpName   string
+	StartDate string
 }
 
 type ExperimentConfig struct {

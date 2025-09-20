@@ -25,7 +25,16 @@ func ListAllExperiments(ctx context.Context) error {
 		if !hasPrefixedExperimentLabel(labelsMap, EXPERIMENT_PREFIX) {
 			continue
 		}
-
+		startDate := ""
+		if str, ok := labelsMap["app.kubernetes.io/startdate"]; ok {
+			if date, err := time.Parse("2006-01-02-15-04-05", str); err == nil {
+				date = date.UTC()
+				startDate = date.Format(time.RFC3339)
+			} else {
+				startDate = str
+			}
+		}
+		expFullName, _ := labelsMap["app.kubernetes.io/name"]
 		var scale int32 = 0
 		if sts.Spec.Replicas != nil {
 			scale = *sts.Spec.Replicas
@@ -57,13 +66,14 @@ func ListAllExperiments(ctx context.Context) error {
 		age := time.Since(sts.CreationTimestamp.Time)
 
 		rows = append(rows, StatefulSetRow{
-			Name:      sts.Name,
+			Name:      expFullName,
 			Namespace: sts.Namespace,
 			Scale:     scale,
 			Running:   running,
 			Ready:     ready,
 			Age:       age,
-			ExpName:   strings.Split(sts.Name, EXPERIMENT_PREFIX)[1],
+			ExpName:   strings.Split(expFullName, EXPERIMENT_PREFIX)[1],
+			StartDate: startDate,
 		})
 	}
 
@@ -75,12 +85,12 @@ func ListAllExperiments(ctx context.Context) error {
 	})
 
 	tw := tabwriter.NewWriter(os.Stdout, 2, 4, 2, ' ', 0)
-	fmt.Fprintln(tw, "EXPERIMENT\tFULLNAME\tSCALE\tRUNNING\tREADY\tAGE")
+	fmt.Fprintln(tw, "EXPERIMENT\tFULLNAME\tSCALE\tRUNNING\tSTARTED AT\tAGE")
 	for _, r := range rows {
 		fmt.Fprintf(
 			tw,
-			"%s\t%s\t%d\t%d\t%d\t%s\n",
-			r.ExpName, r.Name, r.Scale, r.Running, r.Ready, humanDuration(r.Age),
+			"%s\t%s\t%d\t%d\t%s\t%s\n",
+			r.ExpName, r.Name, r.Scale, r.Running, r.StartDate, humanDuration(r.Age),
 		)
 	}
 	return tw.Flush()
@@ -100,7 +110,16 @@ func ReturnAllExperiments() map[string]StatefulSetRow {
 		if !hasPrefixedExperimentLabel(labelsMap, EXPERIMENT_PREFIX) {
 			continue
 		}
-
+		startDate := ""
+		if str, ok := labelsMap["app.kubernetes.io/startdate"]; ok {
+			if date, err := time.Parse("2006-01-02-15-04-05", str); err == nil {
+				date = date.UTC()
+				startDate = date.Format(time.RFC3339)
+			} else {
+				startDate = str
+			}
+		}
+		expFullName, _ := labelsMap["app.kubernetes.io/name"]
 		var scale int32 = 0
 		if sts.Spec.Replicas != nil {
 			scale = *sts.Spec.Replicas
@@ -132,13 +151,14 @@ func ReturnAllExperiments() map[string]StatefulSetRow {
 		age := time.Since(sts.CreationTimestamp.Time)
 
 		result[strings.Split(sts.Name, EXPERIMENT_PREFIX)[1]] = StatefulSetRow{
-			Name:      sts.Name,
+			Name:      expFullName,
 			Namespace: sts.Namespace,
 			Scale:     scale,
 			Running:   running,
 			Ready:     ready,
 			Age:       age,
-			ExpName:   strings.Split(sts.Name, EXPERIMENT_PREFIX)[1],
+			ExpName:   strings.Split(expFullName, EXPERIMENT_PREFIX)[1],
+			StartDate: startDate,
 		}
 	}
 

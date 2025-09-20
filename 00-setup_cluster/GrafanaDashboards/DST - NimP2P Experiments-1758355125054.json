@@ -188,7 +188,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "100 * (\n  sum(container_memory_usage_bytes{job=\"cadvisor-full\", container_label_io_kubernetes_pod_name=~\"$pod\"})\n  /\n  sum(node_memory_MemTotal_bytes{job=\"kubernetes-hosts\", node=~\"$node\"})\n)\n",
+          "expr": "100 * (\n  sum(container_memory_usage_bytes{job=\"cadvisor-full\", container_label_io_kubernetes_pod_name=~\"$pod\", container_label_io_kubernetes_container_name=~\"$container\"})\n  /\n  sum(node_memory_MemTotal_bytes{job=\"kubernetes-hosts\", node=~\"$node\"})\n)\n",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -363,7 +363,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "\n(sum (\n  rate(container_cpu_usage_seconds_total{\n    job=\"cadvisor-full\",\n    container_label_io_kubernetes_pod_name=~\"$pod\"\n  }[$__rate_interval])\n)*100)/sum(machine_cpu_cores{instance=~\"$node\"})",
+          "expr": "\n(sum (\n  rate(container_cpu_usage_seconds_total{\n    job=\"cadvisor-full\",\n    container_label_io_kubernetes_pod_name=~\"$pod\", container_label_io_kubernetes_container_name=~\"$container\"\n  }[$__rate_interval])\n)*100)/sum(machine_cpu_cores{instance=~\"$node\"})",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 1,
@@ -445,7 +445,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(container_memory_usage_bytes{job=\"cadvisor-full\", container_label_io_kubernetes_pod_name=~\"$pod\"})",
+          "expr": "sum(container_memory_usage_bytes{job=\"cadvisor-full\", container_label_io_kubernetes_pod_name=~\"$pod\", container_label_io_kubernetes_container_name=~\"$container\"})",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -538,7 +538,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "\n(sum (\n  (container_cpu_usage_seconds_total{\n    job=\"cadvisor-full\",\n    container_label_io_kubernetes_pod_name=~\"$pod\",     container_label_app_kubernetes_io_name=\"$experiment\"\n  })\n))",
+          "expr": "\n(sum (\n  (container_cpu_usage_seconds_total{\n    job=\"cadvisor-full\",\n    container_label_io_kubernetes_pod_name=~\"$pod\",     container_label_io_kubernetes_container_name=~\"$container\"\n  })\n))",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 1,
@@ -556,6 +556,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Only for NimP2P Container (the sidecar is not taken into account)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -644,7 +645,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (container_memory_working_set_bytes{job=\"cadvisor-full\",container_label_io_kubernetes_pod_name=~\"$pod\"}) by (container_label_io_kubernetes_pod_name)",
+          "expr": "sum (container_memory_working_set_bytes{job=\"cadvisor-full\",container_label_io_kubernetes_pod_name=~\"$pod\",\ncontainer_label_io_kubernetes_container_name=~\"$container\"}) by (container_label_io_kubernetes_pod_name)",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 5,
@@ -655,7 +656,7 @@
           "step": 10
         }
       ],
-      "title": "Pods memory usage",
+      "title": "Pod memory usage",
       "type": "timeseries"
     },
     {
@@ -663,6 +664,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Only for NimP2P Container (the sidecar is not taken into account)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -752,7 +754,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum (rate (container_cpu_usage_seconds_total{job=\"cadvisor-full\", image!=\"\",container_label_io_kubernetes_pod_name=~\"$pod\",}[5m])) by (container_label_io_kubernetes_pod_name)",
+          "expr": "sum (rate (container_cpu_usage_seconds_total{job=\"cadvisor-full\", image!=\"\",container_label_io_kubernetes_pod_name=~\"$pod\", container_label_io_kubernetes_container_name=~\"$container\"}[5m])) by (container_label_io_kubernetes_pod_name)",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 5,
@@ -763,7 +765,7 @@
           "step": 10
         }
       ],
-      "title": "Pods CPU usage (5m avg)",
+      "title": "Pod CPU usage (5m avg)",
       "type": "timeseries"
     },
     {
@@ -1705,22 +1707,20 @@
     "list": [
       {
         "current": {
-          "text": "All",
-          "value": "$__all"
+          "text": "nimp2p-exp-blue",
+          "value": "nimp2p-exp-blue"
         },
-        "definition": "label_values(interface)",
-        "description": "Physical Ethernet Interface",
-        "includeAll": true,
-        "label": "Ethernet_Interface",
-        "name": "phy_interface",
+        "definition": "label_values({job=\"cadvisor-full\"},container_label_app_kubernetes_io_name)",
+        "name": "experiment",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(interface)",
+          "query": "label_values({job=\"cadvisor-full\"},container_label_app_kubernetes_io_name)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
-        "regex": "/^et|^eth|^et|^eth.*$/",
+        "regex": "/^nimp2p-experiment-.*|^nimp2p-experiment.*|^nimp2p|^experiment.*$/",
+        "sort": 2,
         "type": "query"
       },
       {
@@ -1742,6 +1742,48 @@
         "type": "query"
       },
       {
+        "current": {
+          "text": "nimp2p",
+          "value": "nimp2p"
+        },
+        "includeAll": true,
+        "name": "container",
+        "options": [
+          {
+            "selected": true,
+            "text": "nimp2p",
+            "value": "nimp2p"
+          },
+          {
+            "selected": false,
+            "text": "rtt-exporter",
+            "value": "rtt-exporter"
+          }
+        ],
+        "query": "nimp2p, rtt-exporter",
+        "type": "custom"
+      },
+      {
+        "current": {
+          "text": "eth0",
+          "value": "eth0"
+        },
+        "definition": "label_values(interface)",
+        "description": "Virtual Ethernet Interface",
+        "includeAll": false,
+        "label": "eth",
+        "name": "phy_interface",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(interface)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/^et|^eth|^et|^eth.*$/",
+        "type": "query"
+      },
+      {
         "allowCustomValue": false,
         "current": {
           "text": "All",
@@ -1760,34 +1802,16 @@
         "refresh": 1,
         "regex": "",
         "type": "query"
-      },
-      {
-        "current": {
-          "text": "nimp2p-exp-blue",
-          "value": "nimp2p-exp-blue"
-        },
-        "definition": "label_values({job=\"cadvisor-full\"},container_label_app_kubernetes_io_name)",
-        "name": "experiment",
-        "options": [],
-        "query": {
-          "qryType": 1,
-          "query": "label_values({job=\"cadvisor-full\"},container_label_app_kubernetes_io_name)",
-          "refId": "PrometheusVariableQueryEditor-VariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/^nimp2p-experiment-.*|^nimp2p-experiment.*|^nimp2p|^experiment.*$/",
-        "sort": 2,
-        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "DST - NimP2P Experiments",
   "uid": "c9e9554f-54d2-4957-bf4b-c752ad0e3ace25",
-  "version": 35
+  "version": 40
 }
