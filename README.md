@@ -5,7 +5,10 @@ The solution is **multi-tenant**: multiple experiments can run concurrently with
 ## Deploying the kubernetes cluster and required monitoring/logging stack
  - To deploy the cluster and all the required **monitoring/logging** components, Please follow the instruction in [Prometheus config](./00-setup_cluster/).
  - To use the **nimp2p-lab cli** tool, you can directly place the binary in this repo under your `/usr/local/bin/`
- - To build  **nimp2p-lab** from source, run: ```bash ./build.sh```
+ - To build  **nimp2p-lab** from source, run:
+   ```bash
+   ./build.sh
+   ```
    
 **Note:** you need to copy your `/etc/rancher/k3s/k3s.yaml` into `~/.kube/config` so that **nimp2p-lab** can access Kubernetes.
 ## Architecture and Design Choices
