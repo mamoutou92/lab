@@ -80,6 +80,7 @@ Metrics are scraped by **Prometheus**, deployed on the master node as a standard
 ---
 
 ### Log Collectors and Exporters (Deployments + DaemonSets + Filters)
-- Logs are pushed to **Loki**, deployed on the master node as a standard Kubernetes **Deployment**. The Loki configuration is stored in a **ConfigMap** (`00-setup_cluster/ConfigMaps/lab-loki-config.yaml`).
-- Logs are pushed to Loki by **Promtail**, deployed as a **DaemonSet**, with the host’s pod log directory (`/var/log/pods`) mounted to expose container-level logs. The Promtail configuration is stored in a **ConfigMap** (`00-setup_cluster/ConfigMaps/lab-promtail-config.yaml`). The config includes multiple relabelling (in order to be able to show logs per experiment in grafana) and uses a regex to consider pods with label `prefix=nimp2p-exp.*`
+**Logs are pushed to Loki**, which is deployed on the master node as a standard Kubernetes **Deployment**. The Loki configuration is stored in a **ConfigMap** (`00-setup_cluster/ConfigMaps/lab-loki-config.yaml`).
+
+**Logs are pushed by Promtail**, which is deployed as a **DaemonSet**, with the host’s pod log directory (`/var/log/pods`) mounted to expose container-level logs. The Promtail configuration is stored in a **ConfigMap** (`00-setup_cluster/ConfigMaps/lab-promtail-config.yaml`). The config includes multiple relabelling (in order to be able to show logs per experiment in grafana) and uses a regex to consider pods with label `prefix=nimp2p-exp.*`
 ## Deploying the kubernetes cluster
