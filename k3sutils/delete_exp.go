@@ -29,6 +29,13 @@ func DeleteExperiment(expName string) error {
 		tw.Flush()
 		return err
 	}
+	svcClient := K3sClient.CoreV1().Services(DEFAULT_NAMESPACE)
+	if err := svcClient.Delete(ctx, fullName, metav1.DeleteOptions{}); err != nil {
+
+		fmt.Fprintf(tw, "[ERROR] failed to delete service '%s': %v\n", expName, err)
+		tw.Flush()
+		return err
+	}
 	fmt.Fprintf(tw, "[INFO] experiment '%s' deleted\n", expName)
 	tw.Flush()
 	return tw.Flush()

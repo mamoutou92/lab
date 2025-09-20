@@ -1,0 +1,48 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: blackbox-exporter-host
+  namespace: dst-lab
+  labels:
+    app.kubernetes.io/component: blackbox-exporter-host
+    app.kubernetes.io/name: blackbox-exporter-host
+ 
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: blackbox-exporter-host
+      app.kubernetes.io/name: blackbox-exporter-host
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: blackbox-exporter-host
+        app.kubernetes.io/name: blackbox-exporter-host
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: lab-blackbox-config
+      containers:
+        - name: blackbox-exporter-host
+          image: prom/blackbox-exporter:v0.27.0
+          args:
+          - "--config.file=/etc/blackbox/config.yml"          
+          ports:
+            - name: rtt-port
+              containerPort: 9115
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "0.05"
+              memory: "32Mi"
+            limits:
+              cpu: "0.1"
+              memory: "64Mi"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/blackbox/config.yml
+            subPath: config.yml
+      restartPolicy: Always
+      securityContext: {}
+

@@ -28,7 +28,7 @@ var ExperimentParams *cli.App = &cli.App{
 			Flags: []cli.Flag{
 				&cli.StringFlag{Name: "experiment-name", Usage: "A user-friendly name for the experiment (e.g. blue) .", Required: true, Aliases: []string{"name", "n"}},
 				&cli.IntFlag{Name: "num-peers", Value: 2, Usage: "Number of peers in the network.", Aliases: []string{"peers", "p"}},
-				&cli.IntFlag{Name: "msg-rate", Value: 4, Usage: "Delay between messages in milliseconds."},
+				&cli.IntFlag{Name: "msg-rate", Value: 2000, Usage: "Delay between messages in milliseconds."},
 				&cli.IntFlag{Name: "msg-size", Value: 1440, Usage: "Size of message in bytes."},
 				&cli.IntFlag{Name: "num-conn", Value: 2, Usage: "Number of random connections that a single node will make."},
 				&cli.Float64Flag{Name: "cpu", Value: 0.05, Usage: "CPU limit per peer in terms cores (1.0 => 1 full core; 0.5 => half of a core)."},

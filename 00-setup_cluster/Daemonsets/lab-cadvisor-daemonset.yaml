@@ -50,3 +50,19 @@ spec:
         - { name: containerd, hostPath: { path: /run/k3s/containerd } }
         - { name: docker,    hostPath: { path: /var/lib/docker } }
 
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lab-cadvisor
+  namespace: dst-lab
+spec:
+  ports:
+    - name: cadvisor-http
+      protocol: TCP
+      port: 5588
+      targetPort: 5588
+  selector:
+    name: lab-cadvisor
+  clusterIP: None
+  type: ClusterIP

@@ -9,8 +9,10 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func CreateNewExperiment(config ExperimentConfig) error {
@@ -34,6 +36,44 @@ func CreateNewExperiment(config ExperimentConfig) error {
 	}
 	restartAlways := corev1.ContainerRestartPolicyAlways
 
+	// create dedicated Headless service for peer discovery
+
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fullName,
+			Namespace: DEFAULT_NAMESPACE,
+			Labels:    labels,
+		},
+		Spec: corev1.ServiceSpec{
+			ClusterIP: corev1.ClusterIPNone,
+			Selector:  labels,
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "nimp2p",
+					Port:       5000,
+					TargetPort: intstr.FromInt(5000),
+					Protocol:   corev1.ProtocolTCP,
+				},
+			},
+		},
+	}
+
+	if _, err := K3sClient.CoreV1().Services(DEFAULT_NAMESPACE).Get(ctx, fullName, metav1.GetOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			if _, err := K3sClient.CoreV1().Services(DEFAULT_NAMESPACE).Create(ctx, svc, metav1.CreateOptions{}); err != nil {
+				fmt.Fprintf(tw, "[ERROR] failed to create headless service '%s': %v\n", fullName, err)
+				tw.Flush()
+				return err
+			}
+			fmt.Fprintf(tw, "[INFO] headless service '%s' created\n", fullName)
+			tw.Flush()
+		} else {
+			fmt.Fprintf(tw, "[ERROR] failed to get service: %v\n", err)
+			tw.Flush()
+			return err
+		}
+	}
+
 	sts := &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fullName,
@@ -41,7 +81,7 @@ func CreateNewExperiment(config ExperimentConfig) error {
 			Labels:    labels,
 		},
 		Spec: appsv1.StatefulSetSpec{
-			ServiceName: HEADLESS_SERVICE_NAME,
+			ServiceName: fullName,
 			Replicas:    int32ptr(int32(config.NumberPeers)),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
