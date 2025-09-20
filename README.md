@@ -65,8 +65,8 @@ To export the above metrics, I deployed  **cAdvisor** as a **DaemonSet**.
 #### RTT Metrics (Work in Progress)
 Round-trip time (RTT) between peers is a critical metric for evaluating **network health and latency**, especially in a **GossipSub network**:  
 - Messages may be forwarded across multiple peers, each hop adding extra latency.  
-- Measuring RTT between peers helps estimate expected messages delivery time when they are relayed or delivered directly.  
-- RTT Measurement also plays the role network health check. A successfulll ping between 2 nodes indicates that there is no network issue. 
+- Measuring RTT between peers helps estimate the expected message delivery time, whether messages are relayed or delivered directly.  
+- RTT measurement also serves as a network health check: a successful ping between two nodes indicates that the network is functioning properly. 
 
 Currently, RTT metrics are **not yet collected** due to time constraints.  
 The plan is to implement a **custom Golang exporter** that runs as a **sidecar container** in each StatefulSet pod.
@@ -139,11 +139,11 @@ Future improvements could include:
 
 **Example (purple experiment):**  
 <p float="left">
-  <img src="./images/purple-logs-1.png" width="300" />
-  <img src="./images/purple-logs-2.png" width="300" />
+  <img src="./00-setup_cluster/img/purple-log-2.png" width="300" />
+  <img src="./00-setup_cluster/img/purple-log-1.png" width="300" />
 </p>  
 
-[🔗 View snapshot here](#)  
+[🔗 View snapshot here](http://51.91.101.28:31000/dashboard/snapshot/p19z3bv989feMXOjMgwUPTf2RyRfj0WA) 
 
 ---
 
@@ -156,22 +156,13 @@ This dashboard monitors **aggregated physical resources** at the cluster and nod
 
 It provides visibility into **overall capacity** and helps determine when additional nodes or resources are required to scale experiments.  
 
-**Example:**  
-<p float="left">
-  <img src="./images/cluster-metrics-1.png" width="300" />
-  <img src="./images/cluster-metrics-2.png" width="300" />
-</p>  
+[🔗 View snapshot here](http://51.91.101.28:31000/dashboard/snapshot/ht321mbxAPx6TWfQTcBS0CqeHJgPudXS)  
 
 ---
 
 #### 4. Kubernetes Cluster Monitoring Dashboard
 This dashboard provides **Kubernetes cluster health metrics**, relying on **cAdvisor** without namespace filters.  
 It gives insight into the **resource usage of non-experiment workloads**, so you can see the impact of supporting services (Prometheus, Grafana, Loki, etc.) alongside NimP2P experiments.  
-
-**Example:**  
-<p float="left">
-  <img src="./images/k8s-monitoring-1.png" width="300" />
-  <img src="./images/k8s-monitoring-2.png" width="300" />
-</p>  
+  
 
 
