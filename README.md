@@ -121,7 +121,7 @@ This makes it possible to detect when additional resources are required or when 
   <img src="./00-setup_cluster/img/purple-net-2.png" width="300" />
 </p> 
 
-[🔗 View snapshot here](#)  
+[🔗 View snapshot here](#http://51.91.101.28:31000/dashboard/snapshot/rfeA8rofuRX18ddX0meykt7dEsSZhBlY?orgId=1&from=2025-09-20T15:45:46.899Z&to=2025-09-20T16:15:46.899Z&timezone=browser&var-experiment=nimp2p-exp-purple&var-pod=$__all&var-container=nimp2p&var-phy_interface=eth0&var-node=$__all)  
 
 ---
 
