@@ -65,17 +65,17 @@ To export the above metrics, I deployed  **cAdvisor** as a **DaemonSet**.
 #### RTT Metrics (Work in Progress)
 Round-trip time (RTT) between peers is a critical metric for evaluating **network health and latency**, especially in a **GossipSub network**:  
 - Messages may be forwarded across multiple peers, each hop adding extra latency.  
-- Measuring RTT between peers helps detect when messages are relayed rather than delivered directly.  
-- Nodes can be behind restrictive NATs, in such cases, direct peer-to-peer connections may fail due to unsupported or unsuccessful hole punching, so, traffic may be routed through a **relay node**, increasing RTT.  
+- Measuring RTT between peers helps estimate expected messages delivery time when they are relayed or delivered directly.  
+- RTT Measurement also plays the role network health check. A successfulll ping between 2 nodes indicates that there is no network issue. 
 
 Currently, RTT metrics are **not yet collected** due to time constraints.  
 The plan is to implement a **custom Golang exporter** that runs as a **sidecar container** in each StatefulSet pod.
 
 This exporter will:  
-- Discover peers via the experiment’s headless service  
+- Periodically discover peers via the experiment’s headless service  
 - Periodically probe them (e.g., via ICMP or lightweight protocols)  
 - Expose a /metrics endpoint for Prometheus scrapping.  
-- The **Blackbox Exporter** is insufficient for this scenario, since it cannot measure pod-to-pod RTT.
+- The **Blackbox Exporter** is insufficient for this scenario, since it cannot measure pod-to-pod RTT dynamically for every joinning peer.
 
 #### Prometheus Setup
 Metrics are scraped by **Prometheus**, deployed on the master node as a standard Kubernetes **Deployment**.
@@ -134,7 +134,7 @@ This dashboard focuses on **logs and message statistics**:
 Future improvements could include:
 - Tracking successful sends vs. failures  
 - Number of topics per peer  
-- Mesh degree per topic  
+- Mesh degree per topic per peer
 - End-to-end delivery delay  
 
 **Example (purple experiment):**  
