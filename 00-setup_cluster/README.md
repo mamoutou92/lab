@@ -13,7 +13,7 @@ sudo cat /var/lib/rancher/k3s/server/node-token
 ```
 3. Run this on each **Worker Node**: <br />
 ```bash
- export INSTALL_K3S_VERSION=v1.33.4+k3s1 && curl -sfL https://get.k3s.io | K3S_URL=https://51.91.101.28:6443 K3S_TOKEN=<TOKEN> sh -
+ export INSTALL_K3S_VERSION=v1.33.4+k3s1 && curl -sfL https://get.k3s.io | K3S_URL=https://<MASTER_NODE_IP> K3S_TOKEN=<TOKEN> sh -
  ```
 
 ##  2) Install Calico
