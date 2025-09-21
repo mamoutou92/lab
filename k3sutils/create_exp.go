@@ -143,7 +143,7 @@ func CreateNewExperiment(config ExperimentConfig) error {
 					Containers: []corev1.Container{
 						{
 							Name:  DEFAULT_APP_CONTAINER_NAME,
-							Image: NIMP2P_IMAGE,
+							Image: config.ContainerImage,
 							Ports: []corev1.ContainerPort{{
 								ContainerPort: int32(DEFAULT_NIMP2P_PORT), Protocol: corev1.ProtocolTCP,
 							}},

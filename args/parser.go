@@ -28,13 +28,14 @@ var ExperimentParams *cli.App = &cli.App{
 			Flags: []cli.Flag{
 				&cli.StringFlag{Name: "experiment-name", Usage: "A user-friendly name for the experiment (e.g. blue) .", Required: true, Aliases: []string{"name", "n"}},
 				&cli.IntFlag{Name: "num-peers", Value: 2, Usage: "Number of peers in the network.", Aliases: []string{"peers", "p"}},
-				&cli.IntFlag{Name: "msg-rate", Value: 2000, Usage: "Delay between messages in milliseconds."},
-				&cli.IntFlag{Name: "msg-size", Value: 1440, Usage: "Size of message in bytes."},
-				&cli.IntFlag{Name: "num-conn", Value: 2, Usage: "Number of random connections that a single node will make."},
+				&cli.IntFlag{Name: "msg-rate", Value: 2000, Usage: "Delay between messages in milliseconds.", Aliases: []string{"mrate"}},
+				&cli.IntFlag{Name: "msg-size", Value: 1440, Usage: "Size of message in bytes.", Aliases: []string{"msize"}},
+				&cli.IntFlag{Name: "num-conn", Value: 2, Usage: "Number of random connections that a single node will make.", Aliases: []string{"conn", "c"}},
 				&cli.Float64Flag{Name: "cpu", Value: 0.05, Usage: "CPU limit per peer in terms cores (1.0 => 1 full core; 0.5 => half of a core)."},
 				&cli.IntFlag{Name: "ram", Value: 16, Usage: "RAM limit per peer in MB."},
-				&cli.IntFlag{Name: "downlink-bw", Value: 16, Usage: "Downlink DataRate limit per peer in MB."},
-				&cli.IntFlag{Name: "uplink-bw", Value: 16, Usage: "Uplink DataRate limit per peer in MB."},
+				&cli.IntFlag{Name: "downlink-bw", Value: 16, Usage: "Downlink DataRate limit per peer in MB.", Aliases: []string{"dl"}},
+				&cli.IntFlag{Name: "uplink-bw", Value: 16, Usage: "Uplink DataRate limit per peer in MB.", Aliases: []string{"ul"}},
+				&cli.StringFlag{Name: "image", Value: "katakuri100/nimp2p:v2.0.14", Usage: "Container image to use for the experiment.", Aliases: []string{"img", "container-image"}},
 			},
 			Action: func(c *cli.Context) error {
 
@@ -47,6 +48,7 @@ var ExperimentParams *cli.App = &cli.App{
 				CurrentConfig.DlBwMbps = c.Int("downlink-bw")
 				CurrentConfig.UlBwMbps = c.Int("uplink-bw")
 				CurrentConfig.ExperimentName = strings.ToLower(c.String("experiment-name"))
+				CurrentConfig.ContainerImage = c.String("image")
 				return k3sutils.CreateNewExperiment(CurrentConfig)
 			},
 		},

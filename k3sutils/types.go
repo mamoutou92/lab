@@ -24,4 +24,5 @@ type ExperimentConfig struct {
 	Scale          int
 	UlBwMbps       int
 	DlBwMbps       int
+	ContainerImage string
 }
