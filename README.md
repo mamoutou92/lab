@@ -1,18 +1,16 @@
 # NimP2P Lab
 This repository presents a Kubernetes-based monitoring and logging stack for large-scale experimentation with NimP2P nodes.
 
-<details>
-  <summary>Table of Contents</summary>
 
-- [Architecture and Design Choices](#architecture-and-design-choices)
+  <summary>Table of Contents</summary>
 - [Deploying the Kubernetes Cluster](#deploying-the-kubernetes-cluster)
+- [Architecture and Design Choices](#architecture-and-design-choices)
 - [Experiment Unit](#experiment-unit-statefulset--headless-service--custom-labels)
 - [Metrics Collectors and Exporters](#metrics-collectors-and-exporters-deployments--daemonsets--filters)
 - [Visualization](#visualization-k3s-deployments--custom-grafana-dashboards)
 - [Extra Thinking](#extra-thinking)
 - [Future Improvements](#future-improvements)
 
-</details>
 
 The solution is **multi-tenant**: multiple experiments can run concurrently without interfering with each other. Each experiment’s metrics and logs are isolated in Grafana dashboards, thanks to a **unique experiment label** applied to every pod created by the experiment’s StatefulSet.
 ## Deploying the kubernetes cluster and the monitoring/logging stack
