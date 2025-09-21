@@ -1,6 +1,19 @@
 # NimP2P Lab
 This repository presents a Kubernetes-based monitoring and logging stack for large-scale experimentation with NimP2P nodes.
 
+<details>
+  <summary>Table of Contents</summary>
+
+- [Architecture and Design Choices](##architecture-and-design-choices)
+- [Deploying the Kubernetes Cluster](##deploying-the-kubernetes-cluster)
+- [Experiment Unit](##experiment-unit-statefulset--headless-service--custom-labels)
+- [Metrics Collectors and Exporters](##metrics-collectors-and-exporters-deployments--daemonsets--filters)
+- [Visualization](##visualization-k3s-deployments--custom-grafana-dashboards)
+- [Extra Thinking](##extra-thinking)
+- [Future Improvements](##future-improvements)
+
+</details>
+
 The solution is **multi-tenant**: multiple experiments can run concurrently without interfering with each other. Each experiment’s metrics and logs are isolated in Grafana dashboards, thanks to a **unique experiment label** applied to every pod created by the experiment’s StatefulSet.
 ## Deploying the kubernetes cluster and the monitoring/logging stack
  - To deploy the cluster and all the required **monitoring/logging** components, Please follow the instruction in [Cluster Setup](./00-setup_cluster/).
@@ -18,6 +31,7 @@ At a high level, the proposed solution consists of a lightweight **Golang-based 
   - Scale experiments (up or down)
   - Delete experiments cleanly list, scale, and delete experiments.
   The picture below illustrates the overall stack, highlighting the main components and their corresponding kubernetes objects.
+  <img src="./00-setup_cluster/img/NimP2P_Lab_Archi.png" alt="grafana page"/>
 ### Experiment Unit (K3S Statefulset + K3S ClusterIP + K3S Labels)
 An **experiment unit** is a self-contained deployment that represents a NimP2P network.  
 Each unit consists of a **StatefulSet** (to manage the pods) and a **dedicated headless service** (to handle peer discovery).  
