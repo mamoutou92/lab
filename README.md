@@ -2,7 +2,7 @@
 This repository presents a Kubernetes-based monitoring and logging stack for large-scale experimentation with NimP2P nodes.
 
 
-  <summary>Table of Contents</summary>
+## Table of Contents
 - [Deploying the Kubernetes Cluster](#deploying-the-kubernetes-cluster)
 - [Architecture and Design Choices](#architecture-and-design-choices)
 - [Experiment Unit](#experiment-unit-statefulset--headless-service--custom-labels)
