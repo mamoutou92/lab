@@ -33,7 +33,7 @@ At a high level, the proposed solution consists of a lightweight **Golang-based 
 An **experiment unit** is a self-contained deployment that represents a NimP2P network.  
 Each unit consists of a **StatefulSet** (to manage the pods) and a **dedicated headless service** (to handle peer discovery). 
 
-**I used a StatefulSet instead of a Deployment** to ensure deterministic identities for the NimP2P pods in each experiment (e.g., `nimp2p-0`, `nimp2p-1`, …, `nimp2p-N` for the first, second, and N-th pods) and maintains these identities even after rescheduling.
+**I used a StatefulSet instead of a Deployment** to ensure deterministic identities for the NimP2P pods in each experiment (e.g., `nimp2p-0`, `nimp2p-1`, …, `nimp2p-N` for the first, second, and N-th pods) and to maintain these identities even after rescheduling.
 This predictable naming makes it easier to interpret experiment metrics and track the behavior of specific pods (even after restarts). More importantly, it allows logs from a given pod to be reliably located, even if the pod is rescheduled onto a different node (e.g., after a crash or when resource limits are exceeded).
 
 Key aspects:  
