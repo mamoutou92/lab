@@ -179,10 +179,6 @@ This dashboard provides **Kubernetes cluster health metrics**, relying on **cAdv
 It gives insight into the **resource usage of non-experiment workloads**, so you can see the impact of supporting services (Prometheus, Grafana, Loki, etc.) alongside NimP2P experiments.  
   
 ## Extra Thinking
-#### A solution for constant rate message injection per experiment
-To ensure  a constant rate of message injection across an entire experiment network (e.g., one global message per second), I would create a dedicated **Kubernetes Operator** for managing the experiment. A **CustomResourceDefinition (CRD)** named **nimp2pexperiment** to represent an experiment. This CRD will define the **experimentUnit** object which represents a single nimp2p pod with its ENV. The CRD will contain a list of experimentUnit. With this design, the Operator can use different ENV for different experimentUnit of the same experiment deployment (which is not possible with standard statefullset). TThe nimp2p-lab tool will be modified so that it uses the CRD to define new experiment. When the user indicates for instance a global MSGRATE of 500ms ( i.e., 2 messages per second), the Experiment Operator will make sure to enforce that. A simple way to do it in the code is to distribute the rate accross the peers by changing some peers **MSGRATE** ENV and keeping others to 0. In our example, the Operator will create the first 2 pods with **MSGRATE** set to **1000** and set the other peers **MSGRATE** to **0**.
-
-## Extra Thinking
 
 ### A solution for constant-rate message injection per experiment
 To guarantee a **global message injection rate** across an experiment (e.g., one message per second across all peers), I would introduce a dedicated **Kubernetes Operator**.  
