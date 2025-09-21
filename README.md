@@ -25,6 +25,7 @@ At a high level, the proposed solution consists of a lightweight **Golang-based 
   - List active experiments and their status
   - Scale experiments (up or down)
   - Delete experiments
+    
   The picture below illustrates the overall stack, highlighting the main components and their corresponding kubernetes objects.
   
   <img src="./00-setup_cluster/img/NimP2P_Lab_Archi.png" alt="grafana page"/>
