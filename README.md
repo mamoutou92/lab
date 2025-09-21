@@ -262,10 +262,12 @@ By Monitoring both **host-level** and **pod-level** probes, we can determine whe
 **Note:** Small MTU in the hosts or inside the containers can also degrade performance. This can be detected by monitoring packet sizes. In case of large messages (e.g 1440B), IP packet sizes must be around 1500B if the configured MTU is 1500B. If the packet sizes are greatly lower than that during such an experiment, a low MTU might be the root cause.
 
 ## Future Improvements
-- **Use Kube-OVN as the CNI**  
-  - Provides better experiment isolation and multi-tenancy through **VPCs and subnets**.  
-  - Enables richer experiment scenarios (e.g., NAT, middleboxes, packet reordering) by inserting custom OpenFlow rules.
-  - Better enforces bandwith limits (more advanced than default annotations)
+- **Use Kube-OVN as the CNI** in order to: 
+  - Provide better experiment isolation and multi-tenancy through **VPCs and subnets**.  
+  - Enable richer experiment scenarios (e.g., NAT, middleboxes, packet reordering) by inserting custom OpenFlow rules.
+  - Better enforce bandwith limits (more advanced than default annotations)
+  - Isolate monitoring traffic from experiment traffic (by using 2 eth interfaces and 2 virtual subnets per pod: monitoring and experiment subnets)
+  - Enable per-peer delay cmdline arg, allowing usesr to specify RTT between peers (I'll acheive this either by inserting openflow rules or by using  an InitContainer for each pod in an experiment. This InitContainer will use tc and netem to add extra delay before the main container starts)  
 
 - **Add RTT probes**  
   - Between hosts (via DaemonSets).  
