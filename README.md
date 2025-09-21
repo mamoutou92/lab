@@ -45,9 +45,10 @@ Key aspects:
 #### Example: Creating an Experiment
 The command below uses the `nimp2p-lab` tool to create an experiment named **purple** with 5 peers.  
 Each peer is restricted to 5% of a CPU core, 16 MiB of RAM, and 16 Mbps uplink/downlink bandwidth.  
-Peers connect to 5 discovered nodes and send messages of 1440 B every 2000 ms.
+Peers connect randomly to 2 discovered nodes and send messages of 1440 B every 2000 ms.
+The docker image **katakuri100/nimp2p:v2.0.14** is used for each peer (the `--img` parameter gives users the possibility to evaluate different versions/variants of the nimp2p application).
 ```bash
-$ nimp2p-lab create --name purple --peers 5 --msg-size 1440 --msg-rate 2000 --cpu 0.05 --ram 16 --downlink-bw 16 --uplink-bw 16
+$ nimp2p-lab create --name purple --peers 5 --msize 1440 --mrate 2000 --conn 2 --cpu 0.05 --ram 16 --dl 16 --ul 16 --img katakuri100/nimp2p:v2.0.14
 [INFO] headless service 'nimp2p-exp-purple' created
 [INFO] experiment 'purple' created
 ```
