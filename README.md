@@ -91,7 +91,8 @@ This exporter will:
 - Periodically discover peers via the experiment’s headless service  
 - Periodically probe them (e.g., via ICMP or lightweight protocols)  
 - Expose a /metrics endpoint for Prometheus scrapping.  
-- The **Blackbox Exporter** is insufficient for this scenario, since it cannot measure pod-to-pod RTT dynamically for every joinning peer.
+
+  ***Note:*** The **Blackbox Exporter** is insufficient for this scenario, since it cannot measure pod-to-pod RTT dynamically for every joinning peer.
 
 #### Prometheus Setup
 Metrics are scraped by **Prometheus**, deployed on the master node as a standard Kubernetes **Deployment**.
